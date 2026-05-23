@@ -1,0 +1,666 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - name: recno
+#   datatype: int32
+#   description: Record number assigned by the VizieR team. Should Not be used for identification.
+#   meta: !!omap
+#   - {ucd: RECORD}
+#   - {width: 8}
+# - name: HIP
+#   datatype: int32
+#   description: Identifier (HIP number) (H1)
+#   meta: !!omap
+#   - {ucd: ID_MAIN}
+#   - {width: 6}
+# - name: Proxy
+#   datatype: string
+#   description: '[HT] Proximity flag (H2)'
+#   meta: !!omap
+#   - {ucd: CODE_MISC}
+#   - {_votable_string_dtype: char}
+# - name: RAhms
+#   datatype: string
+#   description: Right ascension in h m s, ICRS (J1991.25) (H3)
+#   meta: !!omap
+#   - {ucd: POS_EQ_RA_OTHER}
+#   - {_votable_string_dtype: char}
+# - name: DEdms
+#   datatype: string
+#   description: Declination in deg ' ", ICRS (J1991.25) (H4)
+#   meta: !!omap
+#   - {ucd: POS_EQ_DEC_OTHER}
+#   - {_votable_string_dtype: char}
+# - name: Vmag
+#   unit: mag
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Magnitude in Johnson V (H5)'
+#   meta: !!omap
+#   - {ucd: PHOT_JHN_V}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: VarFlag
+#   datatype: uint8
+#   description: '[1,3]? Coarse variability flag (H6)'
+#   meta: !!omap
+#   - {ucd: CODE_VARIAB}
+#   - {width: 1}
+#   - values: {'null': 255}
+# - name: r_Vmag
+#   datatype: string
+#   description: '[GHT] Source of magnitude (H7)'
+#   meta: !!omap
+#   - {ucd: REFER_CODE}
+#   - {_votable_string_dtype: char}
+# - name: RAICRS
+#   unit: deg
+#   datatype: float64
+#   format: '{:12.8f}'
+#   description: '? alpha, degrees (ICRS, Epoch=J1991.25) (H8)'
+#   meta: !!omap
+#   - {ucd: POS_EQ_RA_MAIN}
+#   - {width: 12}
+#   - {precision: '8'}
+#   - values: {'null': .nan}
+# - name: DEICRS
+#   unit: deg
+#   datatype: float64
+#   format: '{:12.8f}'
+#   description: '? delta, degrees (ICRS, Epoch=J1991.25) (H9)'
+#   meta: !!omap
+#   - {ucd: POS_EQ_DEC_MAIN}
+#   - {width: 12}
+#   - {precision: '8'}
+#   - values: {'null': .nan}
+# - name: AstroRef
+#   datatype: string
+#   description: '[*+A-Z] Reference flag for astrometry (H10)'
+#   meta: !!omap
+#   - {ucd: REFER_CODE}
+#   - {_votable_string_dtype: char}
+# - name: Plx
+#   unit: mas
+#   datatype: float32
+#   format: '{:7.2f}'
+#   description: '? Trigonometric parallax (H11)'
+#   meta: !!omap
+#   - {ucd: POS_PARLX_TRIG}
+#   - {width: 7}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmRA
+#   unit: mas / yr
+#   datatype: float64
+#   format: '{:8.2f}'
+#   description: '*? Proper motion mu_alpha.cos(delta), ICRS(H12)'
+#   meta: !!omap
+#   - {ucd: POS_EQ_PMRA}
+#   - {width: 8}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmDE
+#   unit: mas / yr
+#   datatype: float64
+#   format: '{:8.2f}'
+#   description: '*? Proper motion mu_delta, ICRS (H13)'
+#   meta: !!omap
+#   - {ucd: POS_EQ_PMDEC}
+#   - {width: 8}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_RAICRS
+#   unit: mas
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '*? Standard error in RA*cos(DEdeg) (H14)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_DEICRS
+#   unit: mas
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '*? Standard error in DE (H15)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_Plx
+#   unit: mas
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '? Standard error in Plx (H16)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_pmRA
+#   unit: mas / yr
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '? Standard error in pmRA (H17)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_pmDE
+#   unit: mas / yr
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '? Standard error in pmDE (H18)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: DE_RA
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, DE/RA*cos(delta) (H19)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: Plx_RA
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, Plx/RA*cos(delta) (H20)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: Plx_DE
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, Plx/DE (H21)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmRA_RA
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, pmRA/RA*cos(delta) (H22)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmRA_DE
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, pmRA/DE (H23)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmRA_Plx
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, pmRA/Plx (H24)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmDE_RA
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, pmDE/RA*cos(delta) (H25)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmDE_DE
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, pmDE/DE (H26)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmDE_Plx
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, pmDE/Plx (H27)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: pmDE_pmRA
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '[-1/1]? Correlation, pmDE/pmRA (H28)'
+#   meta: !!omap
+#   - {ucd: STAT_CORRELATION}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: F1
+#   unit: '%'
+#   datatype: int16
+#   description: '? Percentage of rejected data (H29)'
+#   meta: !!omap
+#   - {ucd: STAT_REJECT}
+#   - {width: 3}
+#   - values: {'null': -32768}
+# - name: F2
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Goodness-of-fit parameter (H30)'
+#   meta: !!omap
+#   - {ucd: FIT_GOODNESS}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: BTmag
+#   unit: mag
+#   datatype: float32
+#   format: '{:6.3f}'
+#   description: '? Mean BT magnitude (H32)'
+#   meta: !!omap
+#   - {ucd: PHOT_TYCHO_B}
+#   - {width: 6}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: e_BTmag
+#   unit: mag
+#   datatype: float32
+#   format: '{:6.3f}'
+#   description: '? Standard error on BTmag (H33)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: VTmag
+#   unit: mag
+#   datatype: float32
+#   format: '{:6.3f}'
+#   description: '? Mean VT magnitude (H34)'
+#   meta: !!omap
+#   - {ucd: PHOT_TYCHO_V}
+#   - {width: 6}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: e_VTmag
+#   unit: mag
+#   datatype: float32
+#   format: '{:6.3f}'
+#   description: '? Standard error on VTmag (H35)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: m_BTmag
+#   datatype: string
+#   description: '[A-Z*-] Reference flag for BT and VTmag (H36)'
+#   meta: !!omap
+#   - {ucd: CODE_MULT_INDEX}
+#   - {_votable_string_dtype: char}
+# - name: B-V
+#   unit: mag
+#   datatype: float32
+#   format: '{:6.3f}'
+#   description: '? Johnson B-V colour (H37)'
+#   meta: !!omap
+#   - {ucd: PHOT_JHN_B-V}
+#   - {width: 6}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: e_B-V
+#   unit: mag
+#   datatype: float32
+#   format: '{:6.3f}'
+#   description: '? Standard error on B-V (H38)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: r_B-V
+#   datatype: string
+#   description: '[GT] Source of B-V from Ground or Tycho (H39)'
+#   meta: !!omap
+#   - {ucd: REFER_CODE}
+#   - {_votable_string_dtype: char}
+# - name: V-I
+#   unit: mag
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Colour index in Cousins'' system (H40)'
+#   meta: !!omap
+#   - {ucd: PHOT_COUS_V-I}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_V-I
+#   unit: mag
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Standard error on V-I (H41)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: r_V-I
+#   datatype: string
+#   description: '[A-T] Source of V-I (H42)'
+#   meta: !!omap
+#   - {ucd: REFER_CODE}
+#   - {_votable_string_dtype: char}
+# - name: CombMag
+#   datatype: string
+#   description: '[*] Flag for combined Vmag, B-V, V-I (H43)'
+#   meta: !!omap
+#   - {ucd: CODE_MISC}
+#   - {_votable_string_dtype: char}
+# - name: Hpmag
+#   unit: mag
+#   datatype: float32
+#   format: '{:7.4f}'
+#   description: '? Median magnitude in Hipparcos system (H44)'
+#   meta: !!omap
+#   - {ucd: PHOT_HIPPAR}
+#   - {width: 7}
+#   - {precision: '4'}
+#   - values: {'null': .nan}
+# - name: e_Hpmag
+#   unit: mag
+#   datatype: float32
+#   format: '{:7.4f}'
+#   description: '? Standard error on Hpmag (H45)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 7}
+#   - {precision: '4'}
+#   - values: {'null': .nan}
+# - name: Hpscat
+#   unit: mag
+#   datatype: float32
+#   format: '{:6.3f}'
+#   description: '? Scatter on Hpmag (H46)'
+#   meta: !!omap
+#   - {ucd: FIT_ERROR}
+#   - {width: 6}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: o_Hpmag
+#   datatype: int16
+#   description: '? Number of observations for Hpmag (H47)'
+#   meta: !!omap
+#   - {ucd: NUMBER}
+#   - {width: 3}
+#   - values: {'null': -32768}
+# - name: m_Hpmag
+#   datatype: string
+#   description: '[A-Z*-] Reference flag for Hpmag (H48)'
+#   meta: !!omap
+#   - {ucd: CODE_MULT_INDEX}
+#   - {_votable_string_dtype: char}
+# - name: Hpmax
+#   unit: mag
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Hpmag at maximum (5th percentile) (H49)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: HPmin
+#   unit: mag
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Hpmag at minimum (95th percentile) (H50)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: Period
+#   unit: d
+#   datatype: float32
+#   format: '{:7.2f}'
+#   description: '? Variability period (days) (H51)'
+#   meta: !!omap
+#   - {ucd: TIME_PERIOD}
+#   - {width: 7}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: HvarType
+#   datatype: string
+#   description: '[CDMPRU]? variability type (H52)'
+#   meta: !!omap
+#   - {ucd: VAR_CLASS}
+#   - {_votable_string_dtype: char}
+# - name: moreVar
+#   datatype: string
+#   description: '[12] Additional data about variability (H53)'
+#   meta: !!omap
+#   - {ucd: CODE_MISC}
+#   - {_votable_string_dtype: char}
+# - name: morePhoto
+#   datatype: string
+#   description: '[ABC] Light curve Annex (H54)'
+#   meta: !!omap
+#   - {ucd: CODE_MISC}
+#   - {_votable_string_dtype: char}
+# - name: CCDM
+#   datatype: string
+#   description: CCDM identifier (H55)
+#   meta: !!omap
+#   - {ucd: ID_CROSSID}
+#   - {_votable_string_dtype: char}
+# - name: n_CCDM
+#   datatype: string
+#   description: '[HIM] Historical status flag (H56)'
+#   meta: !!omap
+#   - {ucd: NOTE}
+#   - {_votable_string_dtype: char}
+# - name: Nsys
+#   datatype: int16
+#   description: '? Number of entries with same CCDM (H57)'
+#   meta: !!omap
+#   - {ucd: NUMBER}
+#   - {width: 2}
+#   - values: {'null': -32768}
+# - name: Ncomp
+#   datatype: int16
+#   description: '? Number of components in this entry (H58)'
+#   meta: !!omap
+#   - {ucd: NUMBER}
+#   - {width: 2}
+#   - values: {'null': -32768}
+# - name: MultFlag
+#   datatype: string
+#   description: '[CGOVX] Double/Multiple Systems flag (H59)'
+#   meta: !!omap
+#   - {ucd: CODE_MISC}
+#   - {_votable_string_dtype: char}
+# - name: Source
+#   datatype: string
+#   description: '[PFILS] Astrometric source flag (H60)'
+#   meta: !!omap
+#   - {ucd: REFER_CODE}
+#   - {_votable_string_dtype: char}
+# - name: Qual
+#   datatype: string
+#   description: '[ABCDS] Solution quality (H61)'
+#   meta: !!omap
+#   - {ucd: CODE_QUALITY}
+#   - {_votable_string_dtype: char}
+# - name: m_HIP
+#   datatype: string
+#   description: Component identifiers (H62)
+#   meta: !!omap
+#   - {ucd: CODE_MULT_INDEX}
+#   - {_votable_string_dtype: char}
+# - name: theta
+#   unit: deg
+#   datatype: int16
+#   description: '? Position angle between components (H63)'
+#   meta: !!omap
+#   - {ucd: POS_POS-ANG}
+#   - {width: 3}
+#   - values: {'null': -32768}
+# - name: rho
+#   unit: arcsec
+#   datatype: float32
+#   format: '{:7.3f}'
+#   description: '? Angular separation between components (H64)'
+#   meta: !!omap
+#   - {ucd: POS_ANG_DIST_GENERAL}
+#   - {width: 7}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: e_rho
+#   unit: arcsec
+#   datatype: float32
+#   format: '{:6.3f}'
+#   description: '? Standard error on rho (H65)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '3'}
+#   - values: {'null': .nan}
+# - name: dHp
+#   unit: mag
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Magnitude difference of components (H66)'
+#   meta: !!omap
+#   - {ucd: PHOT_DIFF_MAG}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_dHp
+#   unit: mag
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Standard error on dHp (H67)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: Survey
+#   datatype: string
+#   description: '[S] Flag indicating a Survey Star (H68)'
+#   meta: !!omap
+#   - {ucd: CODE_MISC}
+#   - {_votable_string_dtype: char}
+# - name: Chart
+#   datatype: string
+#   description: '[DG] Identification Chart (H69)'
+#   meta: !!omap
+#   - {ucd: ID_CHART}
+#   - {_votable_string_dtype: char}
+# - name: Notes
+#   datatype: string
+#   description: '[DGPWXYZ] Existence of notes (H70)'
+#   meta: !!omap
+#   - {ucd: NOTE}
+#   - {_votable_string_dtype: char}
+# - name: HD
+#   datatype: int32
+#   description: '[1/359083]? HD number <III/135> (H71)'
+#   meta: !!omap
+#   - {ucd: ID_CROSSID}
+#   - {width: 6}
+#   - values: {'null': -2147483648}
+# - name: BD
+#   datatype: string
+#   description: Bonner DM <I/119>, <I/122> (H72)
+#   meta: !!omap
+#   - {ucd: ID_CROSSID}
+#   - {_votable_string_dtype: char}
+# - name: CoD
+#   datatype: string
+#   description: Cordoba Durchmusterung (DM) <I/114> (H73)
+#   meta: !!omap
+#   - {ucd: ID_CROSSID}
+#   - {_votable_string_dtype: char}
+# - name: CPD
+#   datatype: string
+#   description: Cape Photographic DM <I/108> (H74)
+#   meta: !!omap
+#   - {ucd: ID_CROSSID}
+#   - {_votable_string_dtype: char}
+# - name: __V-I_red
+#   unit: mag
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: V-I used for reductions (H75)
+#   meta: !!omap
+#   - {ucd: PHOT_JHN_V-I}
+#   - {width: 5}
+#   - {precision: '2'}
+# - name: SpType
+#   datatype: string
+#   description: Spectral type (H76)
+#   meta: !!omap
+#   - {ucd: SPECT_TYPE_MK}
+#   - {_votable_string_dtype: char}
+# - name: r_SpType
+#   datatype: string
+#   description: '[1234GKSX]? Source of spectral type (H77)'
+#   meta: !!omap
+#   - {ucd: REFER_CODE}
+#   - {_votable_string_dtype: char}
+# - name: HIPep
+#   datatype: string
+#   description: Hipparcos Epoch Photometry (Plot and List)
+#   meta: !!omap
+#   - {ucd: DATA_LINK}
+#   - {_votable_string_dtype: char}
+# - name: Erratum
+#   datatype: string
+#   description: VizieR added column, not part of original data
+#   meta: !!omap
+#   - {ucd: DATA_LINK}
+#   - {_votable_string_dtype: char}
+# - name: _RA.icrs
+#   unit: deg
+#   datatype: float64
+#   format: '{:12.8f}'
+#   description: Right ascension (ICRS) at Epoch=J2000, proper motions taken into account
+#   meta: !!omap
+#   - {ucd: POS_EQ_RA_OTHER}
+#   - {width: 12}
+#   - {precision: '8'}
+#   - values: {'null': .nan}
+# - name: _DE.icrs
+#   unit: deg
+#   datatype: float64
+#   format: '{:12.8f}'
+#   description: Declination (ICRS) at Epoch=J2000, proper motions taken into account
+#   meta: !!omap
+#   - {ucd: POS_EQ_DEC_OTHER}
+#   - {width: 12}
+#   - {precision: '8'}
+#   - values: {'null': .nan}
+# meta: !!omap
+# - {ID: I_239_hip_main}
+# - {name: I/239/hip_main}
+# - {description: The Hipparcos Main Catalogue}
+# - {QUERY: I/239/hip_main HIP=85749}
+# schema: astropy-2.0
+recno HIP Proxy RAhms DEdms Vmag VarFlag r_Vmag RAICRS DEICRS AstroRef Plx pmRA pmDE e_RAICRS e_DEICRS e_Plx e_pmRA e_pmDE DE_RA Plx_RA Plx_DE pmRA_RA pmRA_DE pmRA_Plx pmDE_RA pmDE_DE pmDE_Plx pmDE_pmRA F1 F2 BTmag e_BTmag VTmag e_VTmag m_BTmag B-V e_B-V r_B-V V-I e_V-I r_V-I CombMag Hpmag e_Hpmag Hpscat o_Hpmag m_Hpmag Hpmax HPmin Period HvarType moreVar morePhoto CCDM n_CCDM Nsys Ncomp MultFlag Source Qual m_HIP theta rho e_rho dHp e_dHp Survey Chart Notes HD BD CoD CPD __V-I_red SpType r_SpType HIPep Erratum _RA.icrs _DE.icrs
+85677 85749 "" "17 31 21.35" "+02 43 28.1" 5.57 "" H 262.83893822 2.72446012 + 8.75 -19.25 19.22 0.8 0.4 1.19 0.81 0.61 0.01 -0.65 -0.05 0.19 0.13 -0.03 0.54 0.24 -0.59 0.11 2 2.35 6.631 0.004 5.672 0.003 "" 0.844 0.004 T 0.86 0.0 L "" 5.7255 0.0005 0.005 101 "" 5.72 5.74 "" "" "" "" 17314+0243 I 1 1 O "" "" "" "" "" "" "" "" S "" "" 158837 "B+02 3337" "" "" 0.86 G8III S HIPep Erratum 262.83889138 2.72450684

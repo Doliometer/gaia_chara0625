@@ -1,0 +1,533 @@
+# %ECSV 1.0
+# ---
+# delimiter: ','
+# datatype:
+# -
+#   name: solution_id
+#   datatype: int64
+#   description: Solution Identifier
+#   meta:
+#     ucd: meta.version
+# -
+#   name: source_id
+#   datatype: int64
+#   description: Source Identifier
+#   meta:
+#     ucd: meta.id;meta.main
+# -
+#   name: nss_solution_type
+#   datatype: string
+#   description: NSS model adopted
+#   meta:
+#     ucd: meta.record
+# -
+#   name: ra
+#   datatype: float64
+#   unit: deg
+#   description: Right ascension
+#   meta:
+#     ucd: pos.eq.ra;meta.main
+#     utype: stc:AstroCoords.Position3D.Value3.C1
+# -
+#   name: ra_error
+#   datatype: float32
+#   unit: mas
+#   description: Standard error of right ascension
+#   meta:
+#     ucd: stat.error;pos.eq.ra
+#     utype: stc:AstroCoords.Position3D.Error3.C1
+# -
+#   name: dec
+#   datatype: float64
+#   unit: deg
+#   description: Declination
+#   meta:
+#     ucd: pos.eq.dec;meta.main
+#     utype: stc:AstroCoords.Position3D.Value3.C2
+# -
+#   name: dec_error
+#   datatype: float32
+#   unit: mas
+#   description: Standard error of declination
+#   meta:
+#     ucd: stat.error;pos.eq.dec
+#     utype: stc:AstroCoords.Position3D.Error3.C2
+# -
+#   name: parallax
+#   datatype: float64
+#   unit: mas
+#   description: Parallax
+#   meta:
+#     ucd: pos.parallax
+# -
+#   name: parallax_error
+#   datatype: float32
+#   unit: mas
+#   description: Standard error of parallax
+#   meta:
+#     ucd: stat.error;pos.parallax
+# -
+#   name: pmra
+#   datatype: float64
+#   unit: mas.yr**-1
+#   description: Proper motion in right ascension direction
+#   meta:
+#     ucd: pos.pm;pos.eq.ra
+#     utype: stc:AstroCoords.Velocity3D.Value3.C1
+# -
+#   name: pmra_error
+#   datatype: float32
+#   unit: mas.yr**-1
+#   description: Standard error of proper motion in right ascension direction
+#   meta:
+#     ucd: stat.error;pos.pm;pos.eq.ra
+#     utype: stc:AstroCoords.Velocity3D.Error3.C1
+# -
+#   name: pmdec
+#   datatype: float64
+#   unit: mas.yr**-1
+#   description: Proper motion in declination direction
+#   meta:
+#     ucd: pos.pm;pos.eq.dec
+#     utype: stc:AstroCoords.Velocity3D.Value3.C2
+# -
+#   name: pmdec_error
+#   datatype: float32
+#   unit: mas.yr**-1
+#   description: Standard error of proper motion in declination direction
+#   meta:
+#     ucd: stat.error;pos.pm;pos.eq.dec
+#     utype: stc:AstroCoords.Velocity3D.Error3.C2
+# -
+#   name: a_thiele_innes
+#   datatype: float64
+#   unit: mas
+#   description: Thiele-Innes element A
+#   meta:
+#     ucd: phys.angSize
+# -
+#   name: a_thiele_innes_error
+#   datatype: float32
+#   unit: mas
+#   description: Standard error of Thiele-Innes element A
+#   meta:
+#     ucd: stat.error;phys.angSize
+# -
+#   name: b_thiele_innes
+#   datatype: float64
+#   unit: mas
+#   description: Thiele-Innes element B
+#   meta:
+#     ucd: phys.angSize
+# -
+#   name: b_thiele_innes_error
+#   datatype: float32
+#   unit: mas
+#   description: Standard error of Thiele-Innes element B
+#   meta:
+#     ucd: stat.error;phys.angSize
+# -
+#   name: f_thiele_innes
+#   datatype: float64
+#   unit: mas
+#   description: Thiele-Innes element F
+#   meta:
+#     ucd: phys.angSize
+# -
+#   name: f_thiele_innes_error
+#   datatype: float32
+#   unit: mas
+#   description: Standard error of Thiele-Innes element F
+#   meta:
+#     ucd: stat.error;phys.angSize
+# -
+#   name: g_thiele_innes
+#   datatype: float64
+#   unit: mas
+#   description: Thiele-Innes element G
+#   meta:
+#     ucd: phys.angSize
+# -
+#   name: g_thiele_innes_error
+#   datatype: float32
+#   unit: mas
+#   description: Standard error of Thiele-Innes element G
+#   meta:
+#     ucd: stat.error;phys.angSize
+# -
+#   name: c_thiele_innes
+#   datatype: float64
+#   unit: AU
+#   description: C element of Thiele-Innes
+#   meta:
+#     ucd: phys.angSize;phys.angSize.smajAxis
+# -
+#   name: c_thiele_innes_error
+#   datatype: float32
+#   unit: AU
+#   description: Standard error of C element of Thiele-Innes
+#   meta:
+#     ucd: stat.error;phys.angSize;phys.angSize.smajAxis
+# -
+#   name: h_thiele_innes
+#   datatype: float64
+#   unit: AU
+#   description: H element of Thiele-Innes
+#   meta:
+#     ucd: phys.angSize;phys.angSize.smajAxis
+# -
+#   name: h_thiele_innes_error
+#   datatype: float32
+#   unit: AU
+#   description: Standard error of H element of Thiele-Innes
+#   meta:
+#     ucd: stat.error;phys.angSize;phys.angSize.smajAxis
+# -
+#   name: period
+#   datatype: float64
+#   unit: d
+#   description: Orbital Period
+#   meta:
+#     ucd: time.period
+# -
+#   name: period_error
+#   datatype: float32
+#   unit: d
+#   description: Standard error of Orbital Period
+#   meta:
+#     ucd: stat.error;time.period
+# -
+#   name: t_periastron
+#   datatype: float64
+#   unit: d
+#   description: Periastron epoch
+#   meta:
+#     ucd: time.epoch
+# -
+#   name: t_periastron_error
+#   datatype: float32
+#   unit: d
+#   description: Standard error of Periastron epoch
+#   meta:
+#     ucd: stat.error;time.epoch
+# -
+#   name: eccentricity
+#   datatype: float64
+#   description: eccentricity
+#   meta:
+#     ucd: src.orbital.eccentricity
+# -
+#   name: eccentricity_error
+#   datatype: float32
+#   description: Standard error of eccentricity
+#   meta:
+#     ucd: stat.error;src.orbital.eccentricity
+# -
+#   name: center_of_mass_velocity
+#   datatype: float64
+#   unit: km.s**-1
+#   description: The velocity of the center of mass
+#   meta:
+#     ucd: phys.veloc
+# -
+#   name: center_of_mass_velocity_error
+#   datatype: float32
+#   unit: km.s**-1
+#   description: Standard error of The velocity of the center of mass
+#   meta:
+#     ucd: stat.error;phys.veloc
+# -
+#   name: semi_amplitude_primary
+#   datatype: float64
+#   unit: km.s**-1
+#   description: Semi-amplitude of the center of mass
+#   meta:
+#     ucd: phys.veloc
+# -
+#   name: semi_amplitude_primary_error
+#   datatype: float32
+#   unit: km.s**-1
+#   description: Standard error of Semi-amplitude of the center of mass
+#   meta:
+#     ucd: stat.error;phys.veloc
+# -
+#   name: semi_amplitude_secondary
+#   datatype: float64
+#   unit: km.s**-1
+#   description: The semiamplitude of the radial velocity curve for second component
+#   meta:
+#     ucd: phys.veloc
+# -
+#   name: semi_amplitude_secondary_error
+#   datatype: float32
+#   unit: km.s**-1
+#   description: Standard error of The semiamplitude of the radial velocity curve for second component
+#   meta:
+#     ucd: stat.error;phys.veloc
+# -
+#   name: mass_ratio
+#   datatype: float64
+#   description: Mass ratio
+#   meta:
+#     ucd: phys.mass;arith.ratio
+# -
+#   name: mass_ratio_error
+#   datatype: float32
+#   description: Standard error of Mass ratio
+#   meta:
+#     ucd: stat.error
+# -
+#   name: fill_factor_primary
+#   datatype: float64
+#   description: Fill factor of primary
+#   meta:
+#     ucd: src.morph.param
+# -
+#   name: fill_factor_primary_error
+#   datatype: float32
+#   description: Standard error of Fill factor of primary
+#   meta:
+#     ucd: stat.error
+# -
+#   name: fill_factor_secondary
+#   datatype: float64
+#   description: Fill factor of secondary
+#   meta:
+#     ucd: src.morph.param
+# -
+#   name: fill_factor_secondary_error
+#   datatype: float32
+#   description: Standard error of Fill factor of secondary
+#   meta:
+#     ucd: stat.error
+# -
+#   name: inclination
+#   datatype: float64
+#   unit: deg
+#   description: Orbital inclination
+#   meta:
+#     ucd: src.orbital.inclination
+# -
+#   name: inclination_error
+#   datatype: float32
+#   unit: deg
+#   description: Standard error of Orbital inclination
+#   meta:
+#     ucd: stat.error;src.orbital.inclination
+# -
+#   name: arg_periastron
+#   datatype: float64
+#   unit: deg
+#   description: Argument of periastron
+#   meta:
+#     ucd: src.orbital.periastron
+# -
+#   name: arg_periastron_error
+#   datatype: float32
+#   unit: deg
+#   description: Standard error of Argument of periastron
+#   meta:
+#     ucd: stat.error;src.orbital.periastron
+# -
+#   name: temperature_ratio
+#   datatype: float64
+#   description: Ratio of the effective temperatures
+#   meta:
+#     ucd: phys.temperature;arith.ratio
+# -
+#   name: temperature_ratio_error
+#   datatype: float64
+#   description: Standard error of the ratio of the effective temperatures
+#   meta:
+#     ucd: stat.error;phys.temperature
+# -
+#   name: temperature_ratio_definition
+#   datatype: int16
+#   description: Code defining which fitting scenario did apply to the effective temperature
+#   meta:
+#     ucd: meta.number
+# -
+#   name: astrometric_n_obs_al
+#   datatype: int32
+#   description: Total astrometric CCD observations in AL considered
+#   meta:
+#     ucd: meta.number
+# -
+#   name: astrometric_n_good_obs_al
+#   datatype: int32
+#   description: Total astrometric CCD observations in AL actually used
+#   meta:
+#     ucd: meta.number
+# -
+#   name: rv_n_obs_primary
+#   datatype: int32
+#   description: Total number of radial velocities considered for the primary
+#   meta:
+#     ucd: meta.number
+# -
+#   name: rv_n_good_obs_primary
+#   datatype: int32
+#   description: Total number of radial velocities actually used for the primary
+#   meta:
+#     ucd: meta.number
+# -
+#   name: rv_n_obs_secondary
+#   datatype: int32
+#   description: Total number of radial velocities considered for the secondary in the case of SB2
+#   meta:
+#     ucd: meta.number
+# -
+#   name: rv_n_good_obs_secondary
+#   datatype: int32
+#   description: Total number of radial velocities actually used for the secondary in the case of SB2
+#   meta:
+#     ucd: meta.number
+# -
+#   name: phot_g_n_obs
+#   datatype: int32
+#   description: Total number of G photometry measurements considered
+#   meta:
+#     ucd: meta.number
+# -
+#   name: phot_g_n_good_obs
+#   datatype: int32
+#   description: Total number of G photometry measurements actually used
+#   meta:
+#     ucd: meta.number
+# -
+#   name: bit_index
+#   datatype: int64
+#   description: boolean mask for the fields above in the corrVec matrix
+#   meta:
+#     ucd: meta.code.status
+# -
+#   name: corr_vec
+#   datatype: string
+#   subtype: 'float32[null]'
+#   description: Vector form of the upper triangle of the correlation matrix (column-major ordered)
+#   meta:
+#     ucd: stat.correlation
+# -
+#   name: obj_func
+#   datatype: float32
+#   description: value of the objective function at the solution
+#   meta:
+#     ucd: stat.fit.param
+# -
+#   name: goodness_of_fit
+#   datatype: float32
+#   description: goodness of fit in the Hipparcos sense
+#   meta:
+#     ucd: stat.fit.goodness
+# -
+#   name: efficiency
+#   datatype: float32
+#   description: Efficiency of the solution
+#   meta:
+#     ucd: stat.fit.param
+# -
+#   name: significance
+#   datatype: float32
+#   description: The significance of the solution (i.e. how worth keeping a model is)
+#   meta:
+#     ucd: stat.fit.param
+# -
+#   name: flags
+#   datatype: int64
+#   description: Quality flag for the achieved NSS solution
+#   meta:
+#     ucd: meta.code.qual
+# -
+#   name: conf_spectro_period
+#   datatype: float32
+#   description: 'The probability of the period for not being due to (gaussian white) noise. Relevant for SB1, SB1C, SB2 and SB2C models. To be ignored otherwise.'
+#   meta:
+#     ucd: stat.probability
+# -
+#   name: r_pole_sum
+#   datatype: float64
+#   description: Sum of the polar radii of primary and secondary (in units of the semi-major axis)
+#   meta:
+#     ucd: phys.size.radius
+# -
+#   name: r_l1_point_sum
+#   datatype: float64
+#   description: L1-pointing radii of primary and secondary (in units of the semi-major axis)
+#   meta:
+#     ucd: phys.size.radius
+# -
+#   name: r_spher_sum
+#   datatype: float64
+#   description: Sum of the radii of sphere having the same volume as the primary and secondary (in units of the semi-major axis
+#   meta:
+#     ucd: phys.size.radius
+# -
+#   name: ecl_time_primary
+#   datatype: float64
+#   unit: d
+#   description: Time of mid-eclipse of the primary by the secondary
+#   meta:
+#     ucd: time.crossing
+# -
+#   name: ecl_time_secondary
+#   datatype: float64
+#   unit: d
+#   description: Time of mid-eclipse of the secondary by the primary
+#   meta:
+#     ucd: time.crossing
+# -
+#   name: ecl_dur_primary
+#   datatype: float64
+#   unit: d
+#   description: Duration of primary eclipse assuming spherical components
+#   meta:
+#     ucd: time.duration
+# -
+#   name: ecl_dur_secondary
+#   datatype: float64
+#   unit: d
+#   description: Duration of secondary eclipse assuming spherical components
+#   meta:
+#     ucd: time.duration
+# -
+#   name: g_luminosity_ratio
+#   datatype: float64
+#   description: Ratio of the G-band luminosity of the secondary over the primary
+#   meta:
+#     ucd: phys.luminosity;arith.ratio
+# -
+#   name: input_period_error
+#   datatype: float32
+#   unit: d
+#   description: Standard error of the period taken from VariEclipsingBinary.frequencyError
+#   meta:
+#     ucd: stat.error;time.period
+# -
+#   name: g_rank
+#   datatype: float64
+#   description: Rank of the G-band solution
+#   meta:
+#     ucd: stat.fit.param
+# -
+#   name: astrometric_jitter
+#   datatype: float64
+#   unit: mas
+#   description: Uncorrelated astrometric jitter term
+#   meta:
+#     ucd: stat.value
+# meta:
+#   name: votable
+#   JOBID: 584cb477-5582-11f1-9630-bc97e148b76b-O
+#   QUERY_STATUS: OK
+#   QUERY: select * from gaiadr3.nss_two_body_orbit where source_id='4376816938736581504'
+#   CITATION: https://www.cosmos.esa.int/web/gaia-users/credits
+#   RELEASE: Gaia DR3
+#   HELP: https://www.cosmos.esa.int/web/gaia-users/archive
+#   ISSUES: https://www.cosmos.esa.int/web/gaia-users/known-issues
+#   DATA: https://www.cosmos.esa.int/web/gaia/data-access
+#   TERMS: https://www.cosmos.esa.int/web/esdc/terms-and-conditions
+#   HOME: https://www.cosmos.esa.int/web/gaia
+#   PUBLISHER: ESA/Gaia/DPAC
+#   CREATOR: Gaia Collaboration
+solution_id,source_id,nss_solution_type,ra,ra_error,dec,dec_error,parallax,parallax_error,pmra,pmra_error,pmdec,pmdec_error,a_thiele_innes,a_thiele_innes_error,b_thiele_innes,b_thiele_innes_error,f_thiele_innes,f_thiele_innes_error,g_thiele_innes,g_thiele_innes_error,c_thiele_innes,c_thiele_innes_error,h_thiele_innes,h_thiele_innes_error,period,period_error,t_periastron,t_periastron_error,eccentricity,eccentricity_error,center_of_mass_velocity,center_of_mass_velocity_error,semi_amplitude_primary,semi_amplitude_primary_error,semi_amplitude_secondary,semi_amplitude_secondary_error,mass_ratio,mass_ratio_error,fill_factor_primary,fill_factor_primary_error,fill_factor_secondary,fill_factor_secondary_error,inclination,inclination_error,arg_periastron,arg_periastron_error,temperature_ratio,temperature_ratio_error,temperature_ratio_definition,astrometric_n_obs_al,astrometric_n_good_obs_al,rv_n_obs_primary,rv_n_good_obs_primary,rv_n_obs_secondary,rv_n_good_obs_secondary,phot_g_n_obs,phot_g_n_good_obs,bit_index,corr_vec,obj_func,goodness_of_fit,efficiency,significance,flags,conf_spectro_period,r_pole_sum,r_l1_point_sum,r_spher_sum,ecl_time_primary,ecl_time_secondary,ecl_dur_primary,ecl_dur_secondary,g_luminosity_ratio,input_period_error,g_rank,astrometric_jitter
+4338096422163308546,4376816938736581504,Orbital,262.8388120741767,0.11297515,2.7245914108905738,0.21642756,8.03237866214376,0.14579192,-18.279644946039635,0.059333213,18.96758515382733,0.079891205,1.674353113763789,1.1426495,1.9527748438868562,0.1749292,3.5687569459618143,0.5537633,-0.5061338941554729,0.71050805,,,,,418.9951896775452,1.598252,142.47457374934373,21.070608,0.10144393971792807,0.021588152,,,,,,,,,,,,,,,,,,,,460,443,,,,,,,8191,"[-0.39200002,0.03267667,-0.60105264,-0.4902564,0.18661074,-0.22034541,0.6735095,-0.74575675,0.48466408,-0.3766793,-0.5496344,0.9408261,-0.47356975,0.22127922,-0.7513646,0.7440392,-0.750655,0.10438754,-0.19047529,0.7172169,-0.84138334,0.5774651,-0.9081673,0.42463824,-0.22206388,0.771703,-0.9912506,0.850221,0.5142253,-0.9563674,0.56101257,-0.20432812,0.7661464,-0.99107546,0.80496275,0.9755221,0.7981718,-0.021285282,-0.070014335,-0.41365996,0.43262383,-0.28601933,0.41145995,0.35248193,0.24952899,-0.5576284,-0.029964643,0.472773,0.23341091,-0.27008352,0.1678119,-0.46410117,-0.24108192,-0.07701052,-0.5985055,-0.52298796,0.9426569,-0.4807255,0.19902046,-0.74086887,0.9982508,-0.8267683,-0.98962724,-0.9923516,-0.2622899,0.1285806]",1175.4164,17.512405,0.0,61.59926,192,,,,,,,,,,,,

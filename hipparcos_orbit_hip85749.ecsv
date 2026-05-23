@@ -1,0 +1,173 @@
+# %ECSV 1.0
+# ---
+# datatype:
+# - name: recno
+#   datatype: int32
+#   description: Record number assigned by the VizieR team. Should Not be used for identification.
+#   meta: !!omap
+#   - {ucd: RECORD}
+#   - {width: 8}
+# - name: HIP
+#   datatype: int32
+#   description: Identifier (HIP) (D01)
+#   meta: !!omap
+#   - {ucd: ID_MAIN}
+#   - {width: 6}
+# - name: P
+#   unit: d
+#   datatype: float64
+#   format: '{:10.4f}'
+#   description: Orbital period (DO2)
+#   meta: !!omap
+#   - {ucd: TIME_PERIOD}
+#   - {width: 10}
+#   - {precision: '4'}
+# - name: T
+#   unit: d
+#   datatype: float64
+#   format: '{:11.4f}'
+#   description: Time of periastron passage (JD-2440000) (DO3)
+#   meta: !!omap
+#   - {ucd: ORBIT_P-ASTRON_DATE}
+#   - {width: 11}
+#   - {precision: '4'}
+# - name: a0
+#   unit: mas
+#   datatype: float64
+#   format: '{:8.2f}'
+#   description: Semi-major axis of photocentric orbit (DO4)
+#   meta: !!omap
+#   - {ucd: ORBIT_SIZE_SMAJ}
+#   - {width: 8}
+#   - {precision: '2'}
+# - name: ecc
+#   datatype: float32
+#   format: '{:7.4f}'
+#   description: '[0,1] Eccentricity (DO5)'
+#   meta: !!omap
+#   - {ucd: ORBIT_ECCENTRICITY}
+#   - {width: 7}
+#   - {precision: '4'}
+# - name: w
+#   unit: deg
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '[0,360] Argument of periastron (DO6)'
+#   meta: !!omap
+#   - {ucd: ORBIT_P-ASTRON_ARG}
+#   - {width: 6}
+#   - {precision: '2'}
+# - name: i
+#   unit: deg
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '[0,180] Inclination (DO7)'
+#   meta: !!omap
+#   - {ucd: POS_INCLIN_LOS}
+#   - {width: 6}
+#   - {precision: '2'}
+# - name: Omega
+#   unit: deg
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '[0,360] Position angle of the node (DO8)'
+#   meta: !!omap
+#   - {ucd: POS_POS-ANG}
+#   - {width: 6}
+#   - {precision: '2'}
+# - name: e_P
+#   unit: d
+#   datatype: float64
+#   format: '{:8.4f}'
+#   description: '? Standard error of P (DO9)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 8}
+#   - {precision: '4'}
+#   - values: {'null': .nan}
+# - name: e_T
+#   unit: d
+#   datatype: float64
+#   format: '{:9.4f}'
+#   description: '? Standard error of T (DO10)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 9}
+#   - {precision: '4'}
+#   - values: {'null': .nan}
+# - name: e_a0
+#   unit: mas
+#   datatype: float32
+#   format: '{:5.2f}'
+#   description: '? Standard error of a0 (DO11)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 5}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_ecc
+#   datatype: float32
+#   format: '{:7.4f}'
+#   description: '? Standard error of ecc (DO12)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 7}
+#   - {precision: '4'}
+#   - values: {'null': .nan}
+# - name: e_w
+#   unit: deg
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '? Standard error of w (DO13)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_i
+#   unit: deg
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '? Standard error of i (DO14)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: e_Omega
+#   unit: deg
+#   datatype: float32
+#   format: '{:6.2f}'
+#   description: '? Standard error of Omega (DO15)'
+#   meta: !!omap
+#   - {ucd: ERROR}
+#   - {width: 6}
+#   - {precision: '2'}
+#   - values: {'null': .nan}
+# - name: dmRef
+#   datatype: int16
+#   description: '? reference to the literature (DO16)'
+#   meta: !!omap
+#   - {ucd: REFER_CODE}
+#   - {width: 3}
+#   - values: {'null': -32768}
+# - name: Notes
+#   datatype: string
+#   description: '[DGPWXYZ] Existence of notes (DO17)'
+#   meta: !!omap
+#   - {ucd: NOTE}
+#   - {_votable_string_dtype: char}
+# - name: flag
+#   datatype: string
+#   description: Status flags for the parameters (DOM1)
+#   meta: !!omap
+#   - {ucd: CODE_MISC}
+#   - {_votable_string_dtype: char}
+# meta: !!omap
+# - {ID: I_239_hip_dm_o}
+# - {name: I/239/hip_dm_o}
+# - {description: 'Double and Multiples: Orbital solutions'}
+# - {QUERY: I/239/hip_dm_o HIP=85749}
+# schema: astropy-2.0
+recno HIP P T a0 ecc w i Omega e_P e_T e_a0 e_ecc e_w e_i e_Omega dmRef Notes flag
+174 85749 418.242 3723.5 3.26 0.203 301.4 76.33 10.26 "" "" 0.81 "" "" 31.88 20.26 71 "" 111110010011
