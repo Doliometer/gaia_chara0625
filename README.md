@@ -1,15 +1,18 @@
 # HD 158837 / HIP 85749 — Astrometric Orbit Analysis
 
-Comparison of the Hipparcos and Gaia DR3 astrometric orbital solutions for the
-single-lined spectroscopic binary HD 158837 (G3III + companion, P ≈ 419 d)
-against a CHARA interferometric observation obtained on 2025 June 02.
+Comparison of the Hipparcos and Gaia DR3 astrometric orbital solutions for
+HD 158837 (G3III, single-lined spectroscopic binary, P ≈ 419 d) against a
+CHARA interferometric observation obtained on 2025 June 02.
 
 ## Background
 
-HD 158837 is a member of a triple system.  The spectroscopic binary component
-has an orbital period of ~418 d and was first characterised by Lucke & Mayor
-(1982, A&A 105, 318), who derived radial-velocity orbital elements from CORAVEL
-observations.  The Hipparcos mission (ESA 1997) added an astrometric orbital
+HD 158837 is a spectroscopic binary with an orbital period of ~418 d, first
+characterised by Lucke & Mayor (1982, A&A 105, 318) from CORAVEL radial-velocity
+observations.  An earlier claim of a wider visual companion (Aitken 1911;
+WDS 17314+0243) is now considered erroneous: all speckle interferometry
+observations since 1976 (Hartkopf, Tokovinin and others) return only upper
+limits at separations < 0.04 arcsec, and many of the original visual measures
+were already flagged as uncertain or erroneous by subsequent observers.  The Hipparcos mission (ESA 1997) added an astrometric orbital
 solution (DMSA/O), but this fixed the period, eccentricity, and argument of
 periastron directly from Lucke & Mayor and fitted only the inclination, ascending
 node, and photocentre semi-major axis to the Hipparcos abscissae.  The Gaia DR3
