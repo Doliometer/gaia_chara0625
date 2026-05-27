@@ -67,39 +67,84 @@ def gaia_covariance(nss_row):
             C[row, col] = C[col, row] = cv[k]; k += 1
     return mu, sigma, np.outer(sigma, sigma) * C
 
+def el_badry_inflation(ruwe, plx_mas, sigma_eta_mas=0.5):
+    """
+    Parallax uncertainty inflation factor from El-Badry (2025, arXiv:2504.11528).
+    Equations 3-4: alpha=2.77, f0=3.73, beta=0.065, gamma=-0.056.
+
+    sigma_eta_mas: per-CCD along-scan uncertainty from Holl et al. (2023) /
+      El-Badry et al. (2024).  For G~5.3 we use 0.5 mas; the dependence is
+      weak (gamma=-0.056), so the exact value matters little.
+
+    Note (Sect. 5.4): the correction is validated for five-parameter solutions.
+    For NSS orbital parallaxes it is approximate — the true inflation factor
+    likely has more complex parameter dependencies.
+    """
+    if ruwe <= 1.0:
+        return 1.0
+    alpha, f0, beta, gamma = 2.77, 3.73, 0.065, -0.056
+    f_max = f0 * (plx_mas / 10.0)**beta * (sigma_eta_mas / 0.1)**gamma
+    return 1.0 + (f_max - 1.0) * (1.0 - np.exp(-alpha * (ruwe - 1.0)))
+
 def mc_gaia_uncertainty(nss_row, t_jd, sep_chara, n_mc=200_000, seed=42):
     """
-    Monte Carlo σ for the Gaia photocentre PA and separation at epoch t_jd.
-    Returns (pa_central, pa_mean, pa_sigma, sep_central, sep_sigma, scale_sigma).
+    Monte Carlo uncertainties for Gaia photocentre PA, sep, scale, and mass
+    at epoch t_jd.
+
+    Returns (pa_central, pa_mean, pa_sigma,
+             sep_central, sep_sigma, scale_sigma,
+             M_central, M_orb_sigma, plx_nom).
+
+    M_orb_sigma is the mass uncertainty from orbital elements alone
+    (parallax held fixed at its nominal NSS value), so that the parallax
+    contribution can be added separately with or without El-Badry inflation.
     """
     mu, _, cov = gaia_covariance(nss_row)
     iA,iB,iF,iG,ie,iP,iT = 5,6,7,8,9,10,11
+    plx_nom = mu[2]   # index 2 = parallax in the 12-parameter NSS solution
     rng = np.random.default_rng(seed)
     s   = rng.multivariate_normal(mu, cov, size=n_mc)
 
-    def _sep_pa(A,B,F,G,e,P,t_peri):
+    def _solve(A,B,F,G,e,P,t_peri):
         T0  = 2457388.5 + t_peri
-        M   = 2*np.pi*((t_jd - T0)/P % 1.0)
-        E   = M.copy()
+        M_a = 2*np.pi*((t_jd - T0)/P % 1.0)
+        E   = M_a.copy()
         for _ in range(100):
-            dE = (M - E + e*np.sin(E))/(1 - e*np.cos(E)); E += dE
+            dE = (M_a - E + e*np.sin(E))/(1 - e*np.cos(E)); E += dE
             if np.all(np.abs(dE) < 1e-12): break
         x = np.cos(E) - e;  y = np.sqrt(1-e**2)*np.sin(E)
-        X, Y = A*x+F*y, B*x+G*y
-        return np.hypot(X, Y), np.degrees(np.arctan2(X, Y)) % 360.0
+        X, Y  = A*x+F*y, B*x+G*y
+        sep   = np.hypot(X, Y)
+        pa    = np.degrees(np.arctan2(X, Y)) % 360.0
+        _S    = (A**2+B**2+F**2+G**2)/2
+        _q    = (A**2+B**2-F**2-G**2)/2
+        a0    = np.sqrt(np.clip(_S + np.sqrt(np.clip(_q**2+(A*F+B*G)**2, 0, None)), 0, None))
+        return sep, pa, a0
 
-    sep_c, pa_c = _sep_pa(mu[iA],mu[iB],mu[iF],mu[iG],mu[ie],mu[iP],mu[iT])
-    sep_s, pa_s = _sep_pa(s[:,iA],s[:,iB],s[:,iF],s[:,iG],s[:,ie],s[:,iP],s[:,iT])
+    # Central values
+    sep_c, pa_c, a0_c = _solve(mu[iA],mu[iB],mu[iF],mu[iG],mu[ie],mu[iP],mu[iT])
+    a_rel_c = sep_chara * a0_c / sep_c
+    M_c     = (a_rel_c / plx_nom)**3 / (mu[iP]/365.25)**2
 
+    # MC samples
+    sep_s, pa_s, a0_s = _solve(s[:,iA],s[:,iB],s[:,iF],s[:,iG],s[:,ie],s[:,iP],s[:,iT])
+
+    # PA statistics
     pa_m  = np.degrees(np.arctan2(np.mean(np.sin(np.deg2rad(pa_s))),
                                    np.mean(np.cos(np.deg2rad(pa_s))))) % 360.0
     pa_sd = np.std(((pa_s - pa_m + 180) % 360) - 180)
 
+    # Scale and sep statistics
     scale_s  = sep_chara / sep_s
     sep_sd   = np.std(sep_s)
     scale_sd = np.std(scale_s)
 
-    return pa_c, pa_m, pa_sd, sep_c, sep_sd, scale_sd
+    # Mass: orbital contribution only (plx fixed at nominal to isolate it)
+    a_rel_s  = sep_chara * a0_s / sep_s
+    M_orb_s  = (a_rel_s / plx_nom)**3 / (s[:,iP]/365.25)**2
+    M_orb_sd = np.std(M_orb_s)
+
+    return pa_c, pa_m, pa_sd, sep_c, sep_sd, scale_sd, M_c, M_orb_sd, plx_nom
 
 # ── Lucke & Mayor (1982) Table 7, HD 158837 ───────────────────────────────────
 # Used only for the Hipparcos section and the mass-function cross-check.
@@ -110,6 +155,11 @@ LM_f_mass = 0.195    # Msun — mass function f(m)
 orb      = Table.read('hipparcos_orbit_hip85749.ecsv', format='ascii.ecsv')[0]
 main     = Table.read('hipparcos_main_hip85749.ecsv',  format='ascii.ecsv')[0]
 gaia_nss = Table.read('gaia_nss_hd158837.ecsv',        format='ascii.ecsv')[0]
+gaia_src = Table.read('gaia_source_hd158837.ecsv',     format='ascii.ecsv')[0]
+
+# RUWE and G magnitude from five-parameter solution (used for El-Badry inflation)
+RUWE_5par = float(gaia_src['ruwe'])
+G_mag     = float(gaia_src['phot_g_mean_mag'])
 
 # Hipparcos
 P_Hip     = float(orb['P'])
@@ -260,11 +310,19 @@ for row in obs:
     dpa_opp  = ((pa_opp  - row['pa'] + 180) % 360) - 180
     dpa_same = ((pa_same - row['pa'] + 180) % 360) - 180
 
-    # MC uncertainties on PA, sep, and scale
+    # MC uncertainties on PA, sep, scale, and mass
     t_jd_row = row['mjd'] + 2400000.5
-    _, pa_mc_mean, pa_mc_sig, _, sep_mc_sig, scale_mc_sig = \
+    _, pa_mc_mean, pa_mc_sig, _, sep_mc_sig, scale_mc_sig, M_mc, M_orb_sd, plx_nom = \
         mc_gaia_uncertainty(gaia_nss, t_jd_row, row['sep'])
     dpa_mc = ((pa_mc_mean - row['pa'] + 180) % 360) - 180
+
+    # Parallax uncertainty: nominal NSS and El-Badry inflated
+    sigma_plx_nom = float(gaia_nss['parallax_error'])
+    f_EB          = el_badry_inflation(RUWE_5par, plx_nom)
+    sigma_plx_EB  = f_EB * sigma_plx_nom
+    # Parallax enters M as M ∝ plx^{-3}; add in quadrature with orbital contribution
+    sigma_M_nom = np.sqrt(M_orb_sd**2 + (M_mc * 3 * sigma_plx_nom / plx_nom)**2)
+    sigma_M_EB  = np.sqrt(M_orb_sd**2 + (M_mc * 3 * sigma_plx_EB  / plx_nom)**2)
 
     print(f"  {row['label']}:")
     print(f"    M = {M:.1f} deg,  E = {E:.1f} deg")
@@ -272,7 +330,11 @@ for row in obs:
     print(f"    sep_binary      (CHARA)     = {row['sep']:.3f} mas")
     print(f"    => a_rel/a0  = {scale:.3f} +/- {scale_mc_sig:.3f}  (no mass or flux-ratio assumption)")
     print(f"    => a_rel     = {a_rel:.2f} mas  =  {a_AU:.3f} AU")
-    print(f"    => M1+M2     = {M_total:.2f} Msun  (Kepler's 3rd law, Gaia Plx)")
+    print(f"    => M1+M2     = {M_total:.2f} Msun")
+    print(f"         sigma (orbital elements, MC)       = {M_orb_sd:.2f} Msun  ({M_orb_sd/M_total*100:.0f}%)")
+    print(f"         sigma (+ nominal NSS plx)          = {sigma_M_nom:.2f} Msun  ({sigma_M_nom/M_total*100:.0f}%)")
+    print(f"         sigma (+ El-Badry plx, f={f_EB:.2f})   = {sigma_M_EB:.2f} Msun  ({sigma_M_EB/M_total*100:.0f}%)")
+    print(f"           [RUWE={RUWE_5par:.2f}, sigma_plx: {sigma_plx_nom:.3f} -> {sigma_plx_EB:.3f} mas]")
     print(f"    Photocentre PA = {pa_ph:.1f} deg  (MC mean: {pa_mc_mean:.1f} deg,  sigma: {pa_mc_sig:.1f} deg)")
     print(f"    PA (Omega sol., secondary opposite)  = {pa_opp:.1f} deg   DPA = {dpa_opp:+.1f} deg")
     print(f"    PA (Omega+180, secondary same dir)   = {pa_same:.1f} deg   DPA = {dpa_same:+.1f} deg  ({abs(dpa_same)/pa_mc_sig:.1f} sigma)")
