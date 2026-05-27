@@ -187,6 +187,43 @@ _S   = (A_G**2 + B_G**2 + F_G**2 + G_G**2) / 2
 _q   = (A_G**2 + B_G**2 - F_G**2 - G_G**2) / 2
 a0_G = np.sqrt(_S + np.sqrt(_q**2 + (A_G*F_G + B_G*G_G)**2))
 
+# ── Gaia Campbell elements (Appendix A, Halbwachs et al. 2023) ────────────────
+# Semi-major axis (same formula as above, via u and v)
+_u_G = (A_G**2 + B_G**2 + F_G**2 + G_G**2) / 2
+_v_G = A_G*G_G - B_G*F_G
+a0_G_camp = np.sqrt(_u_G + np.sqrt((_u_G+_v_G)*(_u_G-_v_G)))   # = a0_G
+
+# omega+Omega and omega-Omega from arctan2 (Eq A.3)
+_wp_Om = np.arctan2(B_G - F_G, A_G + G_G)
+_wm_Om = np.arctan2(B_G + F_G, G_G - A_G)
+_omega0 = (_wp_Om + _wm_Om) / 2
+_Omega0 = (_wp_Om - _wm_Om) / 2
+
+# Resolve quadrant: sin(omega+Omega) same sign as (B-F); sin(omega-Omega) same sign as (B+F)
+omega_G = Omega_G = None
+for k1 in [0, 1]:
+    for k2 in [0, 1]:
+        _om = _omega0 + k1*np.pi
+        _Om = _Omega0 + k2*np.pi
+        if (np.sin(_om+_Om)*(B_G-F_G) >= 0 and np.sin(_om-_Om)*(B_G+F_G) >= 0):
+            omega_G = np.degrees(_om) % 360
+            Omega_G = np.degrees(_Om) % 360
+            break
+    if omega_G is not None:
+        break
+
+# Inclination (Eq A.5-A.6)
+_om_r = np.deg2rad(omega_G); _Om_r = np.deg2rad(Omega_G)
+_d1 = abs((A_G + G_G) * np.cos(_om_r - _Om_r))
+_d2 = abs((B_G - F_G) * np.sin(_om_r - _Om_r))
+if _d1 >= _d2:
+    inc_G = 2*np.degrees(np.arctan(np.sqrt(abs((A_G-G_G)*np.cos(_om_r+_Om_r)) / _d1)))
+else:
+    inc_G = 2*np.degrees(np.arctan(np.sqrt(abs((B_G+F_G)*np.sin(_om_r+_Om_r)) / _d2)))
+
+# CHARA resolved the node ambiguity to the Omega+180 solution
+Omega_G_resolved = (Omega_G + 180) % 360
+
 # ── Parse CHARA table ──────────────────────────────────────────────────────────
 with open('table_HD158837_Genet.txt') as f:
     lines = f.readlines()
@@ -343,24 +380,40 @@ for row in obs:
     print(f"    Observed PA = {row['pa']:.3f} deg  => Omega+180 solution selected")
     print()
 
+# ── Gaia Campbell elements summary (printed before mass-function section) ──────
+print("─────────────────────────────────────────────────────────────────")
+print("Gaia Campbell elements  (converted from Thiele-Innes, Appendix A)")
+print("─────────────────────────────────────────────────────────────────")
+print(f"  a0    = {a0_G:.4f} mas")
+print(f"  omega = {omega_G:.2f} deg")
+print(f"  Omega = {Omega_G:.2f} deg  (raw TI solution)")
+print(f"  Omega = {Omega_G_resolved:.2f} deg  (CHARA-resolved, Omega+180 selected)")
+print(f"  i     = {inc_G:.2f} deg")
+print()
+print("  Hipparcos Campbell elements (directly from catalogue):")
+print(f"    a0    = {a0_Hip:.2f} mas")
+print(f"    omega = {float(orb['w']):.2f} deg  (spectroscopic convention)")
+print(f"    Omega = {Omega_Hip:.2f} deg")
+print(f"    i     = {inc_Hip:.2f} deg  (sigma = 31.9 deg)")
+print()
+print(f"  Delta_i     = {inc_G - inc_Hip:+.1f} deg")
+print(f"  Delta_Omega = {Omega_G_resolved - Omega_Hip:+.1f} deg  (CHARA-resolved Gaia vs Hipparcos)")
+print(f"  Note: i_Gaia > 90 deg implies retrograde motion; Hipparcos has direct motion.")
+print(f"        Difference is {abs(inc_G - inc_Hip)/31.9:.1f} sigma in Hipparcos alone.")
+
 # ── Mass-function cross-check ──────────────────────────────────────────────────
+print()
 print("─────────────────────────────────────────────────────────────────")
 print("Mass-function cross-check  (Lucke & Mayor 1982, Table 7)")
 print("─────────────────────────────────────────────────────────────────")
 print(f"  f(m) = {LM_f_mass:.3f} Msun,   a1 sin i = {LM_a1sini:.3e} km")
-print(f"  Using Hipparcos i = {inc_Hip:.2f} deg:")
-sin_i = np.sin(np.deg2rad(inc_Hip))
-a1_km = LM_a1sini / sin_i
-a1_mas = (a1_km / 1.495978707e8) * plx_G   # using Gaia parallax
-print(f"  a1 = {a1_mas:.2f} mas  (primary orbit)")
 
-# For Gaia M_total, compute m1 and m2 from mass function
-# Use the Gaia-derived a_rel for the most recent obs row (MIRC-X H-band)
+# Gaia a_rel from MIRC-X H-band
 row0 = obs[0]
 t_jd0 = row0['mjd'] + 2400000.5
 x0, y0, _, _ = orbital_xy(t_jd0, P_G, T0_G, e_G)
 sep_ph0 = np.hypot(A_G*x0+F_G*y0, B_G*x0+G_G*y0)
-scale0 = row0['sep'] / sep_ph0
+scale0  = row0['sep'] / sep_ph0
 a_rel_G = scale0 * a0_G
 a_AU_G  = a_rel_G / plx_G
 M_tot_G = a_AU_G**3 / (P_G/365.25)**2
@@ -375,17 +428,28 @@ def planck(lam_um, T):
     return (2*h*c**2 / lam**5) / (np.exp(h*c / (lam*k*T)) - 1.0)
 
 LAM_G, LAM_H, LAM_K = 0.590, 1.650, 2.200   # microns
-m2 = brentq(lambda m2: m2**3 * sin_i**3 / (M_tot_G)**2 - LM_f_mass * (m2/(M_tot_G))**0 / 1,
-            0.1, M_tot_G - 0.1)
-# Correct form: m2^3 * sin^3(i) / (m1+m2)^2 = f(m)
-# With m1+m2 = M_tot_G fixed, solve for m2:
-m2 = brentq(lambda m2: m2**3 * sin_i**3 / M_tot_G**2 - LM_f_mass, 0.1, M_tot_G - 0.01)
-m1 = M_tot_G - m2
+
 print(f"  From Gaia orbit + CHARA: M1+M2 = {M_tot_G:.2f} Msun")
-print(f"  => m2 = {m2:.2f} Msun,  m1 = {m1:.2f} Msun")
-print(f"  => beta = m2/(m1+m2) = {m2/M_tot_G:.3f}")
-print(f"  => f2_Gaia (implied) = beta - a0_Gaia/a_rel = "
-      f"{m2/M_tot_G - a0_G/a_rel_G:.3f}")
+print()
+
+for i_label, i_val in [('Hipparcos', inc_Hip), ('Gaia', inc_G)]:
+    sin_i = np.sin(np.deg2rad(i_val))
+    a1_km  = LM_a1sini / sin_i
+    a1_mas = (a1_km / 1.495978707e8) * plx_G
+    m2 = brentq(lambda m2: m2**3 * sin_i**3 / M_tot_G**2 - LM_f_mass,
+                0.1, M_tot_G - 0.01)
+    m1 = M_tot_G - m2
+    print(f"  Using {i_label} i = {i_val:.2f} deg  (sin i = {sin_i:.4f}):")
+    print(f"    a1 = {a1_mas:.2f} mas  (primary orbit, Gaia parallax)")
+    print(f"    => m2 = {m2:.2f} Msun,  m1 = {m1:.2f} Msun")
+    print(f"    => beta = {m2/M_tot_G:.3f},  f2_G implied = {m2/M_tot_G - a0_G/a_rel_G:.3f}")
+    print()
+
+# Retain m2, m1, sin_i from Hipparcos for the colour section that follows
+sin_i = np.sin(np.deg2rad(inc_Hip))
+m2 = brentq(lambda m2: m2**3 * sin_i**3 / M_tot_G**2 - LM_f_mass,
+            0.1, M_tot_G - 0.01)
+m1 = M_tot_G - m2
 
 # ── CHARA colour analysis: f2, H/K colour ratio, and beta ─────────────────────
 print()
