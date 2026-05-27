@@ -87,9 +87,49 @@ orbits and applies a pseudo-circular fix below e < 0.0005; HD 158837
 (e ≈ 0.10) is well above that threshold and receives no automatic mitigation,
 so the problem is present but silent.
 
+**Hipparcos vs Gaia orbit direction.**
+Converting the Gaia Thiele-Innes elements to Campbell form (Appendix A of
+Halbwachs et al. 2023) gives i_Gaia = 119.8°, while Hipparcos gives
+i_Hip = 76.3° (σ = 31.9°).  Because i > 90° corresponds to retrograde
+orbital motion, the two solutions disagree not only in the inclination value
+(Δi = +43.5°) but in the sense of the orbit.  A Monte Carlo propagation
+through the full Gaia covariance matrix yields σ_i(Gaia) ≈ 1.8°, so the
+two solutions are ~24σ apart in Gaia's uncertainty — a genuine contradiction
+rather than a marginal tension.  The Hipparcos DMSA/O fit for this star fixed
+e and ω from Lucke & Mayor and fitted only three parameters (i, Ω, a₀) to
+relatively few abscissae, so its formal σ_i = 31.9° is likely underestimated.
+The Gaia solution, based on 443 along-scan measurements with no spectroscopic
+priors, is almost certainly more reliable on inclination.
+
 The Hipparcos orbit (PA residual ≈ 95°, implied M₁+M₂ ≈ 12 M☉) is poorly
 constrained — its inclination and ascending node have formal errors of ±32°
 and ±20° respectively — and is not suitable for orbital scale calibration.
+
+**Conclusions on individual stellar temperatures and masses.**
+The CHARA H- and K-band flux ratios (f₂_H = 0.041, f₂_K = 0.040) constrain
+the secondary temperature via the H/K colour ratio, in which the unknown
+angular diameter ratio (R₂/R₁) cancels.  Assuming T₁ = 5000 K for the G3III
+primary, the best-fit secondary temperature is T₂ ≈ 5550 K, suggesting a
+late-G or early-K subgiant or dwarf companion.  Note that the secondary
+angular diameter (diam2) returned by the CHARA fit is below the formal
+resolution limit and is treated as unreliable; diam1 for the primary
+(≈ 0.94 mas in H) is well-determined.
+
+Three estimates of the mass ratio β = m₂/(m₁+m₂) are derived:
+
+| Method | β | m₂ (M☉) | m₁ (M☉) |
+|---|---|---|---|
+| Spectroscopic f(m) + Hipparcos i = 76.3° | 0.381 | 1.46 | 2.37 |
+| Spectroscopic f(m) + Gaia i = 119.8° | 0.427 | 1.64 | 2.20 |
+| CHARA H/K colour → f₂_G (no inclination needed) | 0.342 | 1.31 | 2.52 |
+
+All three are consistent within the ~55% uncertainty on M_total from the Gaia
+orbital solution.  The colour-based estimate is the most model-independent,
+requiring neither the spectroscopic mass function nor an inclination, though
+it does assume a primary temperature and blackbody spectra.  A ±5% systematic
+on the f₂_H/f₂_K ratio shifts T₂ by ~1000 K and β by ~0.03, so the
+cross-instrument flux calibration between MIRC-X and MYSTIC is the dominant
+uncertainty in this approach.
 
 ## Dependencies
 
