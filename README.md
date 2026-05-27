@@ -62,6 +62,28 @@ The CHARA position angle also resolves the 180° ascending-node ambiguity
 inherent in purely astrometric orbits, selecting the Ω + 180° solution
 (ΔPA ≈ −17°) over the Ω solution (ΔPA ≈ +163°).
 
+**Caution — near-degeneracy in the Gaia orbital solution.**
+The low eccentricity (e ≈ 0.10) means that periastron is geometrically
+ill-defined, creating a near-degeneracy between the time of periastron T₀
+and the Thiele-Innes orientation elements.  This is reflected in the Gaia
+`corr_vec`: the correlations corr(T₀, A) = +0.998, corr(T₀, F) = −0.990,
+and corr(T₀, G) = −0.992 are close to ±1, indicating that the fit can trade
+off *when* periastron occurs against *how the orbit is oriented* with almost
+no change in the astrometric residuals.  As a result, the marginal
+uncertainty on T₀ alone (σ ≈ 21 d, 5% of the period) overstates the
+true timing uncertainty when the TI elements are held fixed, and the
+marginal uncertainty on individual TI elements overstates their geometric
+uncertainty.  A Monte Carlo propagation through the full covariance matrix
+gives σ_PA ≈ 17° at the CHARA epoch — much smaller than the ~35° obtained
+by adding TI and T₀ contributions in quadrature — and places the observed
+17° PA residual at < 1 σ.  Interpretations of the Gaia orbital elements
+(e.g. implied inclination or ascending node) should account for this
+covariance structure rather than treating the parameter errors independently.
+The Gaia DR3 NSS documentation notes the same degeneracy for near-circular
+orbits and applies a pseudo-circular fix below e < 0.0005; HD 158837
+(e ≈ 0.10) is well above that threshold and receives no automatic mitigation,
+so the problem is present but silent.
+
 The Hipparcos orbit (PA residual ≈ 95°, implied M₁+M₂ ≈ 12 M☉) is poorly
 constrained — its inclination and ascending node have formal errors of ±32°
 and ±20° respectively — and is not suitable for orbital scale calibration.

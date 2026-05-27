@@ -30,6 +30,70 @@ Data sources (all in this directory):
 import numpy as np
 from astropy.table import Table
 
+# ── Gaia corr_vec → full covariance matrix ────────────────────────────────────
+# For nss_solution_type='Orbital' (bit_index=8191) the 12 fitted parameters are:
+#   0 ra  1 dec  2 parallax  3 pmra  4 pmdec
+#   5 A   6 B    7 F         8 G
+#   9 e   10 P   11 t_periastron
+# corr_vec stores the upper triangle column-major: (0,1),(0,2),(1,2),(0,3),...
+# Source: Gaia DR3 data model,
+#   https://gea.esac.esa.int/archive/documentation/GDR3/Gaia_archive/chap_datamodel/
+#   sec_dm_non--single_stars_tables/ssec_dm_nss_two_body_orbit.html
+def gaia_covariance(nss_row):
+    """Return (mu, sigma, cov) for the 12 Gaia NSS Orbital parameters."""
+    mu = np.array([
+        float(nss_row['ra']),               float(nss_row['dec']),
+        float(nss_row['parallax']),         float(nss_row['pmra']),
+        float(nss_row['pmdec']),
+        float(nss_row['a_thiele_innes']),   float(nss_row['b_thiele_innes']),
+        float(nss_row['f_thiele_innes']),   float(nss_row['g_thiele_innes']),
+        float(nss_row['eccentricity']),     float(nss_row['period']),
+        float(nss_row['t_periastron']),
+    ])
+    sigma = np.array([
+        float(nss_row['ra_error']),               float(nss_row['dec_error']),
+        float(nss_row['parallax_error']),         float(nss_row['pmra_error']),
+        float(nss_row['pmdec_error']),
+        float(nss_row['a_thiele_innes_error']),   float(nss_row['b_thiele_innes_error']),
+        float(nss_row['f_thiele_innes_error']),   float(nss_row['g_thiele_innes_error']),
+        float(nss_row['eccentricity_error']),     float(nss_row['period_error']),
+        float(nss_row['t_periastron_error']),
+    ])
+    n, cv = 12, np.array(nss_row['corr_vec'])
+    C = np.eye(n)
+    k = 0
+    for col in range(1, n):
+        for row in range(col):
+            C[row, col] = C[col, row] = cv[k]; k += 1
+    return mu, sigma, np.outer(sigma, sigma) * C
+
+def mc_pa_uncertainty(nss_row, t_jd, n_mc=200_000, seed=42):
+    """
+    Monte Carlo σ for the Gaia photocentre PA at epoch t_jd.
+    Returns (pa_central_deg, pa_mean_deg, pa_sigma_deg).
+    """
+    mu, _, cov = gaia_covariance(nss_row)
+    iA,iB,iF,iG,ie,iP,iT = 5,6,7,8,9,10,11
+    rng = np.random.default_rng(seed)
+    s   = rng.multivariate_normal(mu, cov, size=n_mc)
+
+    def _pa(A,B,F,G,e,P,t_peri):
+        T0  = 2457388.5 + t_peri
+        M   = 2*np.pi*((t_jd - T0)/P % 1.0)
+        E   = M.copy()
+        for _ in range(100):
+            dE = (M - E + e*np.sin(E))/(1 - e*np.cos(E)); E += dE
+            if np.all(np.abs(dE) < 1e-12): break
+        x = np.cos(E) - e;  y = np.sqrt(1-e**2)*np.sin(E)
+        return np.degrees(np.arctan2(A*x+F*y, B*x+G*y)) % 360.0
+
+    pa_c  = _pa(mu[iA],mu[iB],mu[iF],mu[iG],mu[ie],mu[iP],mu[iT])
+    pa_s  = _pa(s[:,iA],s[:,iB],s[:,iF],s[:,iG],s[:,ie],s[:,iP],s[:,iT])
+    pa_m  = np.degrees(np.arctan2(np.mean(np.sin(np.deg2rad(pa_s))),
+                                   np.mean(np.cos(np.deg2rad(pa_s))))) % 360.0
+    pa_sd = np.std(((pa_s - pa_m + 180) % 360) - 180)
+    return pa_c, pa_m, pa_sd
+
 # ── Lucke & Mayor (1982) Table 7, HD 158837 ───────────────────────────────────
 # Used only for the Hipparcos section and the mass-function cross-check.
 LM_a1sini = 94.8e6   # km  — a1 sin i
@@ -189,6 +253,11 @@ for row in obs:
     dpa_opp  = ((pa_opp  - row['pa'] + 180) % 360) - 180
     dpa_same = ((pa_same - row['pa'] + 180) % 360) - 180
 
+    # MC uncertainty on PA
+    t_jd_row = row['mjd'] + 2400000.5
+    _, pa_mc_mean, pa_mc_sig = mc_pa_uncertainty(gaia_nss, t_jd_row)
+    dpa_mc = ((pa_mc_mean - row['pa'] + 180) % 360) - 180
+
     print(f"  {row['label']}:")
     print(f"    M = {M:.1f} deg,  E = {E:.1f} deg")
     print(f"    sep_photocentre (predicted) = {sep_ph:.3f} mas")
@@ -196,9 +265,9 @@ for row in obs:
     print(f"    => a_rel/a0  = {scale:.3f}  (no mass or flux-ratio assumption)")
     print(f"    => a_rel     = {a_rel:.2f} mas  =  {a_AU:.3f} AU")
     print(f"    => M1+M2     = {M_total:.2f} Msun  (Kepler's 3rd law, Gaia Plx)")
-    print(f"    Photocentre PA = {pa_ph:.1f} deg")
+    print(f"    Photocentre PA = {pa_ph:.1f} deg  (MC mean: {pa_mc_mean:.1f} deg,  sigma: {pa_mc_sig:.1f} deg)")
     print(f"    PA (Omega sol., secondary opposite)  = {pa_opp:.1f} deg   DPA = {dpa_opp:+.1f} deg")
-    print(f"    PA (Omega+180, secondary same dir)   = {pa_same:.1f} deg   DPA = {dpa_same:+.1f} deg")
+    print(f"    PA (Omega+180, secondary same dir)   = {pa_same:.1f} deg   DPA = {dpa_same:+.1f} deg  ({abs(dpa_same)/pa_mc_sig:.1f} sigma)")
     print(f"    Observed PA = {row['pa']:.3f} deg  => Omega+180 solution selected")
     print()
 
