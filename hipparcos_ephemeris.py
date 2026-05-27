@@ -194,7 +194,9 @@ with open('table_HD158837_Genet.txt') as f:
 def parse_chara_row(line):
     tok = line.split()
     return dict(label=(' '.join(tok[21:])), mjd=float(tok[1]),
-                sep=float(tok[4]), pa=float(tok[5]))
+                sep=float(tok[4]), pa=float(tok[5]),
+                f2=float(tok[11]),
+                diam1=float(tok[15]), diam2=float(tok[17]))
 
 obs = [parse_chara_row(l) for l in lines[2:] if l.strip()]
 
@@ -363,7 +365,16 @@ a_rel_G = scale0 * a0_G
 a_AU_G  = a_rel_G / plx_G
 M_tot_G = a_AU_G**3 / (P_G/365.25)**2
 
-from scipy.optimize import brentq
+from scipy.optimize import brentq, brentq as _brentq
+
+# ── Planck function (SI) ───────────────────────────────────────────────────────
+def planck(lam_um, T):
+    """Spectral radiance B_lambda at wavelength lam_um (microns) and temp T (K)."""
+    h, c, k = 6.62607e-34, 2.99792e8, 1.38065e-23
+    lam = lam_um * 1e-6
+    return (2*h*c**2 / lam**5) / (np.exp(h*c / (lam*k*T)) - 1.0)
+
+LAM_G, LAM_H, LAM_K = 0.590, 1.650, 2.200   # microns
 m2 = brentq(lambda m2: m2**3 * sin_i**3 / (M_tot_G)**2 - LM_f_mass * (m2/(M_tot_G))**0 / 1,
             0.1, M_tot_G - 0.1)
 # Correct form: m2^3 * sin^3(i) / (m1+m2)^2 = f(m)
@@ -375,3 +386,78 @@ print(f"  => m2 = {m2:.2f} Msun,  m1 = {m1:.2f} Msun")
 print(f"  => beta = m2/(m1+m2) = {m2/M_tot_G:.3f}")
 print(f"  => f2_Gaia (implied) = beta - a0_Gaia/a_rel = "
       f"{m2/M_tot_G - a0_G/a_rel_G:.3f}")
+
+# ── CHARA colour analysis: f2, angular diameters, and beta ────────────────────
+print()
+print("=" * 65)
+print("CHARA colour analysis: flux ratios, angular diameters, and beta")
+print("=" * 65)
+print("""
+The photocentre equation links the mass ratio beta = m2/(m1+m2) to the
+flux ratio f2_lambda and the relative/photocentre orbit at the same
+wavelength:
+
+    a0_lambda = (beta - f2_lambda) * a_rel
+    =>  beta  =  f2_lambda + a0_lambda / a_rel
+
+Gaia's a0 is measured in G-band (~590 nm); CHARA measures f2 in H and K.
+The angular diameters (diam1, diam2) from CHARA interferometry give the
+radius ratio R2/R1 = diam2/diam1, and together with f2 the surface
+brightness ratio, from which T2 can be estimated via the Planck function.
+The predicted f2_G then gives beta independent of the mass function.
+""")
+
+# Primary effective temperature: G3III ~ 5000 K
+T1 = 5000.0
+
+print(f"{'Band':14s} {'sep':>8s} {'f2':>8s} {'diam1':>8s} {'diam2':>8s} "
+      f"{'R2/R1':>7s} {'SB ratio':>9s}")
+print("─" * 65)
+results = []
+for row in obs:
+    R_ratio  = row['diam2'] / row['diam1']
+    SB_ratio = row['f2'] / R_ratio**2
+    print(f"  {row['label']:12s} {row['sep']:8.4f} {row['f2']:8.5f} "
+          f"{row['diam1']:8.4f} {row['diam2']:8.4f} {R_ratio:7.4f} {SB_ratio:9.4f}")
+    results.append(dict(row=row, R_ratio=R_ratio, SB_ratio=SB_ratio))
+
+print()
+print(f"  Assumed T1 (G3III primary) = {T1:.0f} K")
+print()
+
+# Fit T2 to H-band SB ratio; predict G and K
+T2_grid = np.linspace(2000, 8000, 10000)
+
+for res in results:
+    row      = res['row']
+    R_ratio  = res['R_ratio']
+    SB_ratio = res['SB_ratio']
+    lam      = LAM_H if 'H' in row['label'] else LAM_K
+
+    SB_grid  = planck(lam, T2_grid) / planck(lam, T1)
+    T2       = T2_grid[np.argmin(np.abs(SB_grid - SB_ratio))]
+
+    f2_G_pred = R_ratio**2 * planck(LAM_G, T2) / planck(LAM_G, T1)
+    f2_H_pred = R_ratio**2 * planck(LAM_H, T2) / planck(LAM_H, T1)
+    f2_K_pred = R_ratio**2 * planck(LAM_K, T2) / planck(LAM_K, T1)
+
+    # beta from Planck-predicted f2_G and Gaia a0
+    row0     = obs[0]
+    t_jd_r   = row0['mjd'] + 2400000.5
+    x0, y0, _, _ = orbital_xy(t_jd_r, P_G, T0_G, e_G)
+    sep_ph_r = np.hypot(A_G*x0+F_G*y0, B_G*x0+G_G*y0)
+    a_rel_r  = row['sep'] * a0_G / sep_ph_r
+    beta_col = f2_G_pred + a0_G / a_rel_r
+
+    print(f"  {row['label']}:")
+    print(f"    Best-fit T2 = {T2:.0f} K  (from {lam:.2f} um SB ratio, T1={T1:.0f} K)")
+    print(f"    Predicted f2: G={f2_G_pred:.5f},  H={f2_H_pred:.5f},  K={f2_K_pred:.5f}")
+    print(f"    Measured  f2:              H={obs[0]['f2']:.5f},  K={obs[1]['f2']:.5f}")
+    print(f"    Colour-corrected beta = f2_G + a0_G/a_rel = {f2_G_pred:.4f} + {a0_G/a_rel_r:.4f} = {beta_col:.4f}")
+    print(f"    => m2 = {beta_col * M_tot_G:.2f} Msun,  m1 = {(1-beta_col)*M_tot_G:.2f} Msun")
+    print()
+
+print("  Compare:")
+print(f"    beta (mass function + Hipparcos i)    = {m2/M_tot_G:.4f}")
+print(f"    beta (CHARA f2_H, no colour corr.)   = {obs[0]['f2'] + a0_G/a_rel_G:.4f}")
+print(f"    beta (CHARA colour-corrected f2_G)   = {results[0]['R_ratio']**2 * planck(LAM_G, T2_grid[np.argmin(np.abs(planck(LAM_H, T2_grid)/planck(LAM_H, T1) - results[0]['SB_ratio']))]) / planck(LAM_G, T1) + a0_G/a_rel_G:.4f}")
