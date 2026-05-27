@@ -67,17 +67,17 @@ def gaia_covariance(nss_row):
             C[row, col] = C[col, row] = cv[k]; k += 1
     return mu, sigma, np.outer(sigma, sigma) * C
 
-def mc_pa_uncertainty(nss_row, t_jd, n_mc=200_000, seed=42):
+def mc_gaia_uncertainty(nss_row, t_jd, sep_chara, n_mc=200_000, seed=42):
     """
-    Monte Carlo σ for the Gaia photocentre PA at epoch t_jd.
-    Returns (pa_central_deg, pa_mean_deg, pa_sigma_deg).
+    Monte Carlo σ for the Gaia photocentre PA and separation at epoch t_jd.
+    Returns (pa_central, pa_mean, pa_sigma, sep_central, sep_sigma, scale_sigma).
     """
     mu, _, cov = gaia_covariance(nss_row)
     iA,iB,iF,iG,ie,iP,iT = 5,6,7,8,9,10,11
     rng = np.random.default_rng(seed)
     s   = rng.multivariate_normal(mu, cov, size=n_mc)
 
-    def _pa(A,B,F,G,e,P,t_peri):
+    def _sep_pa(A,B,F,G,e,P,t_peri):
         T0  = 2457388.5 + t_peri
         M   = 2*np.pi*((t_jd - T0)/P % 1.0)
         E   = M.copy()
@@ -85,14 +85,21 @@ def mc_pa_uncertainty(nss_row, t_jd, n_mc=200_000, seed=42):
             dE = (M - E + e*np.sin(E))/(1 - e*np.cos(E)); E += dE
             if np.all(np.abs(dE) < 1e-12): break
         x = np.cos(E) - e;  y = np.sqrt(1-e**2)*np.sin(E)
-        return np.degrees(np.arctan2(A*x+F*y, B*x+G*y)) % 360.0
+        X, Y = A*x+F*y, B*x+G*y
+        return np.hypot(X, Y), np.degrees(np.arctan2(X, Y)) % 360.0
 
-    pa_c  = _pa(mu[iA],mu[iB],mu[iF],mu[iG],mu[ie],mu[iP],mu[iT])
-    pa_s  = _pa(s[:,iA],s[:,iB],s[:,iF],s[:,iG],s[:,ie],s[:,iP],s[:,iT])
+    sep_c, pa_c = _sep_pa(mu[iA],mu[iB],mu[iF],mu[iG],mu[ie],mu[iP],mu[iT])
+    sep_s, pa_s = _sep_pa(s[:,iA],s[:,iB],s[:,iF],s[:,iG],s[:,ie],s[:,iP],s[:,iT])
+
     pa_m  = np.degrees(np.arctan2(np.mean(np.sin(np.deg2rad(pa_s))),
                                    np.mean(np.cos(np.deg2rad(pa_s))))) % 360.0
     pa_sd = np.std(((pa_s - pa_m + 180) % 360) - 180)
-    return pa_c, pa_m, pa_sd
+
+    scale_s  = sep_chara / sep_s
+    sep_sd   = np.std(sep_s)
+    scale_sd = np.std(scale_s)
+
+    return pa_c, pa_m, pa_sd, sep_c, sep_sd, scale_sd
 
 # ── Lucke & Mayor (1982) Table 7, HD 158837 ───────────────────────────────────
 # Used only for the Hipparcos section and the mass-function cross-check.
@@ -253,16 +260,17 @@ for row in obs:
     dpa_opp  = ((pa_opp  - row['pa'] + 180) % 360) - 180
     dpa_same = ((pa_same - row['pa'] + 180) % 360) - 180
 
-    # MC uncertainty on PA
+    # MC uncertainties on PA, sep, and scale
     t_jd_row = row['mjd'] + 2400000.5
-    _, pa_mc_mean, pa_mc_sig = mc_pa_uncertainty(gaia_nss, t_jd_row)
+    _, pa_mc_mean, pa_mc_sig, _, sep_mc_sig, scale_mc_sig = \
+        mc_gaia_uncertainty(gaia_nss, t_jd_row, row['sep'])
     dpa_mc = ((pa_mc_mean - row['pa'] + 180) % 360) - 180
 
     print(f"  {row['label']}:")
     print(f"    M = {M:.1f} deg,  E = {E:.1f} deg")
-    print(f"    sep_photocentre (predicted) = {sep_ph:.3f} mas")
+    print(f"    sep_photocentre (predicted) = {sep_ph:.3f} +/- {sep_mc_sig:.3f} mas")
     print(f"    sep_binary      (CHARA)     = {row['sep']:.3f} mas")
-    print(f"    => a_rel/a0  = {scale:.3f}  (no mass or flux-ratio assumption)")
+    print(f"    => a_rel/a0  = {scale:.3f} +/- {scale_mc_sig:.3f}  (no mass or flux-ratio assumption)")
     print(f"    => a_rel     = {a_rel:.2f} mas  =  {a_AU:.3f} AU")
     print(f"    => M1+M2     = {M_total:.2f} Msun  (Kepler's 3rd law, Gaia Plx)")
     print(f"    Photocentre PA = {pa_ph:.1f} deg  (MC mean: {pa_mc_mean:.1f} deg,  sigma: {pa_mc_sig:.1f} deg)")
