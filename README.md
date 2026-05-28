@@ -45,6 +45,12 @@ DMSA/O orbital solution and writes them as ECSV files.
 Computes the predicted sky position of the secondary at the CHARA epoch from
 both the Hipparcos and Gaia orbits, and compares with the CHARA measurement.
 
+### `chara_spectral_f2.py`
+Fits f₂ and diam1 jointly per spectral channel from the MIRC-X (H-band) and
+MYSTIC (K-band) OIFITS files, using the correct resolved-primary V² model.
+Derives T₂ from the H/K weighted-mean flux ratio (excluding CO-contaminated
+K-band channels at 2.27–2.35 μm).  Produces `chara_f2_per_channel.png`.
+
 **Key result:** the CHARA binary separation at a known orbital phase directly
 determines the scale of the Gaia astrometric orbit without any flux-ratio or
 mass assumption:
@@ -106,14 +112,23 @@ constrained — its inclination and ascending node have formal errors of ±32°
 and ±20° respectively — and is not suitable for orbital scale calibration.
 
 **Conclusions on individual stellar temperatures and masses.**
-The CHARA H- and K-band flux ratios (f₂_H = 0.041, f₂_K = 0.040) constrain
-the secondary temperature via the H/K colour ratio, in which the unknown
-angular diameter ratio (R₂/R₁) cancels.  Assuming T₁ = 5000 K for the G3III
-primary, the best-fit secondary temperature is T₂ ≈ 5550 K, suggesting a
-late-G or early-K subgiant or dwarf companion.  Note that the secondary
+The CHARA H- and K-band flux ratios constrain the secondary temperature via
+the H/K colour ratio, in which the unknown angular diameter ratio (R₂/R₁)
+cancels.  Assuming T₁ = 5000 K for the G3III primary, the best-fit secondary
+temperature is T₂ ≈ 5000 ± 700 K (statistical), suggesting a late-G or early-K
+subgiant or dwarf companion.  This estimate is based on a per-channel fit of
+the binary V² model to the OIFITS data (`chara_spectral_f2.py`), which fits
+f₂ and diam1 jointly per spectral channel using the correct resolved-primary
+formula; the broad-band Genet values (f₂_H = 0.041, f₂_K = 0.040) give a
+consistent but slightly higher estimate of ≈ 5550 K.  Note that the secondary
 angular diameter (diam2) returned by the CHARA fit is below the formal
-resolution limit and is treated as unreliable; diam1 for the primary
-(≈ 0.94 mas in H) is well-determined.
+resolution limit and is treated as unreliable; diam1 for the primary (≈ 0.94
+mas in H, ≈ 0.96 mas in K) is well-determined and consistent across channels.
+
+The per-channel K-band fit reveals a drop in f₂ at 2.27–2.35 μm (f₂ falling
+from ≈ 0.040 to < 0.010), coinciding with the CO 2-0 band head at 2.293 μm.
+These channels are excluded from the H/K temperature comparison; only the
+continuum region 2.06–2.23 μm is used for K-band.
 
 Three estimates of the mass ratio β = m₂/(m₁+m₂) are derived:
 
@@ -121,15 +136,18 @@ Three estimates of the mass ratio β = m₂/(m₁+m₂) are derived:
 |---|---|---|---|
 | Spectroscopic f(m) + Hipparcos i = 76.3° | 0.381 | 1.46 | 2.37 |
 | Spectroscopic f(m) + Gaia i = 119.8° | 0.427 | 1.64 | 2.20 |
-| CHARA H/K colour → f₂_G (no inclination needed) | 0.342 | 1.31 | 2.52 |
+| CHARA H/K colour → f₂_G (no inclination needed) | 0.325 | 1.24 | 2.59 |
 
 All three are consistent within the ~55% uncertainty on M_total from the Gaia
 orbital solution.  The colour-based estimate is the most model-independent,
 requiring neither the spectroscopic mass function nor an inclination, though
 it does assume a primary temperature and blackbody spectra.  A ±5% systematic
 on the f₂_H/f₂_K ratio shifts T₂ by ~1000 K and β by ~0.03, so the
-cross-instrument flux calibration between MIRC-X and MYSTIC is the dominant
-uncertainty in this approach.
+cross-instrument flux calibration between MIRC-X and MYSTIC remains the
+dominant uncertainty.  The per-channel analysis tightens the statistical error
+on the band-averaged f₂ values (to ±0.001) but does not reduce this systematic,
+which arises from calibrator-star and pipeline differences between the two
+instruments.
 
 ## Dependencies
 
