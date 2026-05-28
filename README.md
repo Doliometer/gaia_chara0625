@@ -7,7 +7,7 @@ CHARA interferometric observation obtained on 2025 June 02.
 ## Background
 
 HD 158837 is a spectroscopic binary with an orbital period of ~418 d, first
-characterised by Lucke & Mayor (1982, A&A 105, 318) from CORAVEL radial-velocity
+characterized by Lucke & Mayor (1982, A&A 105, 318) from CORAVEL radial-velocity
 observations.  An earlier claim of a wider visual companion (Aitken 1911;
 WDS 17314+0243) is now considered erroneous: all speckle interferometry
 observations since 1976 (Hartkopf, Tokovinin and others) return only upper
@@ -15,8 +15,8 @@ limits at separations < 0.04 arcsec, and many of the original visual measures
 were already flagged as uncertain or erroneous by subsequent observers.  The Hipparcos mission (ESA 1997) added an astrometric orbital
 solution (DMSA/O), but this fixed the period, eccentricity, and argument of
 periastron directly from Lucke & Mayor and fitted only the inclination, ascending
-node, and photocentre semi-major axis to the Hipparcos abscissae.  The Gaia DR3
-Non-Single Star (NSS) catalogue provides a fully independent astrometric orbital
+node, and photocenter semi-major axis to the Hipparcos abscissae.  The Gaia DR3
+Non-Single Star (NSS) catalog provides a fully independent astrometric orbital
 solution from 443 along-scan measurements, with no spectroscopic priors.
 
 ## Data files
@@ -24,9 +24,9 @@ solution from 443 along-scan measurements, with no spectroscopic priors.
 | File | Contents |
 |---|---|
 | `gaia_nss_hd158837.ecsv` | Gaia DR3 NSS Orbital solution (Thiele-Innes elements, P, e, T₀, parallax) |
-| `gaia_source_hd158837.ecsv` | Gaia DR3 main source catalogue entry |
+| `gaia_source_hd158837.ecsv` | Gaia DR3 main source catalog entry |
 | `hipparcos_orbit_hip85749.ecsv` | Hipparcos DMSA/O orbital solution (I/239/hip\_dm\_o) |
-| `hipparcos_main_hip85749.ecsv` | Hipparcos main catalogue entry (I/239/hip\_main) |
+| `hipparcos_main_hip85749.ecsv` | Hipparcos main catalog entry (I/239/hip\_main) |
 | `table_HD158837_Genet.txt` | CHARA/MIRC-X (H-band) and MYSTIC (K-band) interferometric observation, 2025 Jun 02; columns: date, MJD, HJD, JY, sep (mas), PA (deg), σ\_maj, σ\_min, σ\_PA, f1, σ\_f1, f2, σ\_f2, f3, σ\_f3, diam1 (mas), σ\_diam1, diam2 (mas), σ\_diam2, χ²\_V2, χ²\_CP |
 
 The Lucke & Mayor (1982) spectroscopic elements used in `hipparcos_ephemeris.py`
@@ -38,7 +38,7 @@ are hardcoded as constants (the paper is not redistributed here):
 ## Scripts
 
 ### `query_hipparcos.py`
-Queries VizieR (via astroquery) for the Hipparcos main catalogue entry and
+Queries VizieR (via astroquery) for the Hipparcos main catalog entry and
 DMSA/O orbital solution and writes them as ECSV files.
 
 ### `hipparcos_ephemeris.py`
@@ -56,7 +56,7 @@ determines the scale of the Gaia astrometric orbit without any flux-ratio or
 mass assumption:
 
 ```
-a_rel / a₀  =  sep_binary (CHARA)  /  sep_photocentre (Gaia TI prediction)
+a_rel / a₀  =  sep_binary (CHARA)  /  sep_photocenter (Gaia TI prediction)
 ```
 
 From the Gaia orbit + CHARA (H-band):
@@ -113,7 +113,7 @@ and ±20° respectively — and is not suitable for orbital scale calibration.
 
 **Conclusions on individual stellar temperatures and masses.**
 The CHARA H- and K-band flux ratios constrain the secondary temperature via
-the H/K colour ratio, in which the unknown angular diameter ratio (R₂/R₁)
+the H/K color ratio, in which the unknown angular diameter ratio (R₂/R₁)
 cancels.  Assuming T₁ = 5000 K for the G3III primary, the best-fit secondary
 temperature is T₂ ≈ 5000 ± 700 K (statistical), suggesting a late-G or early-K
 subgiant or dwarf companion.  This estimate is based on a per-channel fit of
@@ -136,10 +136,10 @@ Three estimates of the mass ratio β = m₂/(m₁+m₂) are derived:
 |---|---|---|---|
 | Spectroscopic f(m) + Hipparcos i = 76.3° | 0.381 | 1.46 | 2.37 |
 | Spectroscopic f(m) + Gaia i = 119.8° | 0.427 | 1.64 | 2.20 |
-| CHARA H/K colour → f₂_G (no inclination needed) | 0.325 | 1.24 | 2.59 |
+| CHARA H/K color → f₂_G (no inclination needed) | 0.325 | 1.24 | 2.59 |
 
 All three are consistent within the ~55% uncertainty on M_total from the Gaia
-orbital solution.  The colour-based estimate is the most model-independent,
+orbital solution.  The color-based estimate is the most model-independent,
 requiring neither the spectroscopic mass function nor an inclination, though
 it does assume a primary temperature and blackbody spectra.  A ±5% systematic
 on the f₂_H/f₂_K ratio shifts T₂ by ~1000 K and β by ~0.03, so the
