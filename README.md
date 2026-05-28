@@ -119,7 +119,7 @@ temperature is T₂ ≈ 5000 ± 700 K (statistical), suggesting a late-G or earl
 subgiant or dwarf companion.  This estimate is based on a per-channel fit of
 the binary V² model to the OIFITS data (`chara_spectral_f2.py`), which fits
 f₂ and diam1 jointly per spectral channel using the correct resolved-primary
-formula; the broad-band Genet values (f₂_H = 0.041, f₂_K = 0.040) give a
+formula; the broad-band CHARA values (f₂_H = 0.041, f₂_K = 0.040) give a
 consistent but slightly higher estimate of ≈ 5550 K.  Note that the secondary
 angular diameter (diam2) returned by the CHARA fit is below the formal
 resolution limit and is treated as unreliable; diam1 for the primary (≈ 0.94
