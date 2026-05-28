@@ -11,7 +11,7 @@ where V_UD = 2J₁(x)/x, x = π·d_rad·B/λ  (uniform disk, diameter d in mas),
       φ = 2π/λ · (u·Δα + v·Δδ),  and f₁ = 1 − f₂.
 
 Both f₂ and diam1 are fitted jointly per spectral channel, fixing the binary
-geometry (sep, PA) from the Genet et al. table_HD158837_Genet.txt broad-band
+geometry (sep, PA) from the CHARA broad-band fit (table_HD158837_Genet.txt)
 results.
 
 T₂ is then estimated from f₂(λ) using the Planck function ratio: H-only (no
@@ -26,7 +26,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-# ── Known binary parameters (from Genet table, MIRC-X H-band) ─────────────────
+# ── Known binary parameters (from CHARA broad-band fit, MIRC-X H-band) ────────
 SEP_MAS = 8.1800          # mas, from MIRC-X fit
 PA_DEG  = 324.586         # deg, from MIRC-X fit (CHARA-selected node)
 MAS2RAD = np.pi / (180 * 3600 * 1000)
@@ -74,7 +74,7 @@ def v2_binary(u, v, lam, f2, diam1_mas):
 def fit_f2_per_channel(filepath, diam1_init_mas):
     """
     Fit f2 and diam1 jointly per spectral channel.
-    diam1_init_mas: initial guess for primary diameter (from Genet broad-band fit).
+    diam1_init_mas: initial guess for primary diameter (from CHARA broad-band fit).
     """
     f = fits.open(filepath)
     wav_m   = [h.data['EFF_WAVE'] for h in f if h.name == 'OI_WAVELENGTH'][0]
@@ -150,9 +150,9 @@ def fit_f2_per_channel(filepath, diam1_init_mas):
 
     return results
 
-# ── Genet broad-band diam1 for initial guesses ────────────────────────────────
-DIAM1_H_MAS = 0.9437   # mas, from Genet MIRC-X H-band fit
-DIAM1_K_MAS = 0.9614   # mas, from Genet MYSTIC K-band fit
+# ── CHARA broad-band diam1 for initial guesses ────────────────────────────────
+DIAM1_H_MAS = 0.9437   # mas, from CHARA MIRC-X H-band fit
+DIAM1_K_MAS = 0.9614   # mas, from CHARA MYSTIC K-band fit
 
 # ── Run fits ───────────────────────────────────────────────────────────────────
 print("Fitting f2 and diam1 per spectral channel (this takes ~1–2 min)...")
